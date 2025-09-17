@@ -32,6 +32,12 @@ const Header = () => {
                         className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                             Products
                         </Link>
+                        <Link 
+                        href={'/recipes'}
+                        
+                        className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                            Recipes
+                        </Link>
                         <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                             About
                         </button>
