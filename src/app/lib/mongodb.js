@@ -1,6 +1,6 @@
 // lib/mongodb.js
 import { MongoClient } from 'mongodb';
-
+import mongoose from 'mongoose';
 const uri = process.env.MONGODB_URI;
 const options = {};
 const url = "mongodb+srv://hussinmahmoud3030_db_user:svRaSiI2s1XsAwlR@dayemcluster.bgybiei.mongodb.net/?retryWrites=true&w=majority&appName=dayemCluster"

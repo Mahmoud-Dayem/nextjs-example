@@ -13,8 +13,6 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-
 
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
@@ -72,45 +70,35 @@ export default function LoginPage() {
           // existing user - show message and suggest sign in
           setMessage(data.message || 'Account already exists. Try signing in.');
           setMessageType('warning');
+          // optionally switch to sign-in mode:
+          // setIsNewUser(false);
         } else if (res.ok) {
-          // After successful signup, automatically sign in
-          const signInResult = await signIn('credentials', {
-            email: formData.email,
-            password: formData.password,
-            redirect: false,
-          });
-          
-          if (signInResult?.error) {
-            setMessage('Account created but could not sign in automatically');
-            setMessageType('warning');
-          } else {
-            setMessage('Account created successfully');
-            setMessageType('success');
-            router.refresh();
-            router.push('/');
-          }
+          setMessage(data.message || 'Account created');
+          setMessageType('success');
+          setFormData({ name: '', email: '', password: '' });
+          setTimeout(() => router.push('/'), 1200);
         } else {
           setMessage(data.message || 'Unable to create account');
           setMessageType('error');
         }
       } else {
-        // Sign in flow
-        const result = await signIn('credentials', {
-          email: formData.email,
-          password: formData.password,
-          redirect: false,
+        // Sign in flow - let server validate email & password
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email, password: formData.password })
         });
+        const data = await res.json();
 
-        if (result?.error) {
-          setMessage(result.error);
-          setMessageType('error');
-        } else {
-          setMessage('Login successful');
+        if (res.ok && data.success) {
+          setMessage(data.message || 'Signed in successfully');
           setMessageType('success');
-          router.refresh();
-          router.push('/');
+          setTimeout(() => router.push('/'), 800);
+        } else {
+          // handle invalid credentials or other server hints
+          setMessage(data.message || 'Invalid email or password');
+          setMessageType('error');
         }
-
       }
     } catch (err) {
       console.error(err);
@@ -130,10 +118,11 @@ export default function LoginPage() {
 
         {message && (
           <div
-            className={`mb-4 p-3 rounded text-sm ${messageType === 'success' ? 'bg-green-50 text-green-700 border border-green-100' :
+            className={`mb-4 p-3 rounded text-sm ${
+              messageType === 'success' ? 'bg-green-50 text-green-700 border border-green-100' :
               messageType === 'warning' ? 'bg-yellow-50 text-yellow-700 border border-yellow-100' :
-                'bg-red-50 text-red-700 border border-red-100'
-              }`}
+              'bg-red-50 text-red-700 border border-red-100'
+            }`}
           >
             {message}
           </div>
@@ -179,8 +168,9 @@ export default function LoginPage() {
                 onChange={handleInputChange}
                 disabled={isLoading}
                 placeholder="Password"
-                className={`w-full px-3 py-2 border rounded ${errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                className={`w-full px-3 py-2 border rounded ${
+                  errors.password ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
               <button
                 type="button"
@@ -207,8 +197,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-2 rounded text-white ${isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-              }`}
+            className={`w-full py-2 rounded text-white ${
+              isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
             {isLoading ? 'Processing...' : (isNewUser ? 'Create account' : 'Sign in')}
           </button>
